@@ -1,0 +1,6 @@
+start cmd /k "cd C:\Users\Administrator\artspaceMicroservices\AuthService && dotnet run --project artspace.API"
+start cmd /k "cd C:\Users\Administrator\artspaceMicroservices\ArtService && dotnet run --project ArtService.API"
+start cmd /k "cd C:\Users\Administrator\artspaceMicroservices\CommentService && dotnet run --project CommentService.API"
+start cmd /k "cd C:\Users\Administrator\artspaceMicroservices\NotificationService && dotnet run --project NotificationService.API"
+start cmd /k "cd C:\Users\Administrator\artspaceMicroservices\ApiGateway\ApiGateway && dotnet run"
+start cmd /k "cd C:\Users\Administrator\artspaceMicroservices\frontend && npm start"
