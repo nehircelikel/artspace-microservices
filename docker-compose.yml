@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres
+    container_name: artspace-postgres
+    environment:
+      POSTGRES_PASSWORD: artspace123
+      POSTGRES_MULTIPLE_DATABASES: authdb,artdb,commentdb,notificationdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/17
+      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: artspace-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  auth-service:
+    build: ./AuthService
+    ports:
+      - "5144:8080"
+    depends_on:
+      - postgres
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=authdb;Username=postgres;Password=artspace123
+      - Jwt__Secret=artspace_super_secret_key_123456789_must_be_long
+      - Jwt__Issuer=artspace
+      - Jwt__Audience=artspace
+
+  art-service:
+    build: ./ArtService
+    ports:
+      - "5280:8080"
+    depends_on:
+      - postgres
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=artdb;Username=postgres;Password=artspace123
+      - Jwt__Secret=artspace_super_secret_key_123456789_must_be_long
+      - Jwt__Issuer=artspace
+      - Jwt__Audience=artspace
+
+  comment-service:
+    build: ./CommentService
+    ports:
+      - "5285:8080"
+    depends_on:
+      - postgres
+      - rabbitmq
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=commentdb;Username=postgres;Password=artspace123
+      - Jwt__Secret=artspace_super_secret_key_123456789_must_be_long
+      - Jwt__Issuer=artspace
+      - Jwt__Audience=artspace
+
+  notification-service:
+    build: ./NotificationService
+    restart: on-failure
+    ports:
+      - "5012:8080"
+    depends_on:
+      - postgres
+      - rabbitmq
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=notificationdb;Username=postgres;Password=artspace123
+      - Jwt__Secret=artspace_super_secret_key_123456789_must_be_long
+      - Jwt__Issuer=artspace
+      - Jwt__Audience=artspace
+
+  api-gateway:
+    build: ./ApiGateway/ApiGateway
+    ports:
+      - "5092:8080"
+    depends_on:
+      - auth-service
+      - art-service
+      - comment-service
+      - notification-service
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api-gateway
+
+volumes:
+  postgres_data:

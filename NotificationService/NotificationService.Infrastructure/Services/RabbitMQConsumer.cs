@@ -22,7 +22,7 @@ public class RabbitMQConsumer : BackgroundService
 
     public override Task StartAsync(CancellationToken cancellationToken)
     {
-        var factory = new ConnectionFactory { HostName = "localhost" };
+        var factory = new ConnectionFactory { HostName = "rabbitmq" };
         _connection = factory.CreateConnection();
         _channel = _connection.CreateModel();
         _channel.QueueDeclare(
@@ -34,7 +34,7 @@ public class RabbitMQConsumer : BackgroundService
         return base.StartAsync(cancellationToken);
     }
 
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var consumer = new EventingBasicConsumer(_channel);
         consumer.Received += async (model, ea) =>
@@ -52,7 +52,7 @@ public class RabbitMQConsumer : BackgroundService
                 {
                     Id = Guid.NewGuid(),
                     UserId = commentEvent.ArtistId,
-                    Message = $"{commentEvent.Username} eserinize yorum yaptı: {commentEvent.Content}",
+                    Message = $"{commentEvent.Username} commented on your artwork: {commentEvent.Content}",
                     IsRead = false,
                     CreatedAt = DateTime.UtcNow
                 });
@@ -60,7 +60,7 @@ public class RabbitMQConsumer : BackgroundService
         };
 
         _channel.BasicConsume(queue: "comment_created", autoAck: true, consumer: consumer);
-        return Task.CompletedTask;
+        return;
     }
 
     public override void Dispose()

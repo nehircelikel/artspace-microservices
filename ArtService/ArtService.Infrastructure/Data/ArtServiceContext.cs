@@ -21,4 +21,5 @@ public class ArtServiceContext : DbContext
             entity.Property(a => a.ArtistId).IsRequired();
         });
     }
+    
 }
