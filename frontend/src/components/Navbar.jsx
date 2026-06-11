@@ -53,6 +53,10 @@ export default function Navbar() {
       <Link to="/artworks" style={navLink('/artworks')}>Artworks</Link>
 
       {token && (
+        <Link to="/requests" style={navLink('/requests')}>Requests</Link>
+      )}
+
+      {token && (
         <Link to="/notifications" style={navLink('/notifications')}>Notifications</Link>
       )}
 
@@ -63,7 +67,10 @@ export default function Navbar() {
             fontSize: '0.82rem',
             fontWeight: 400,
           }}>
-            Logged in as: <span style={{ color: 'rgba(255,255,255,0.8)', fontWeight: 500 }}>{user?.username}</span>
+            Logged in as: <Link
+              to={`/${user?.role === 'Artist' ? 'artists' : 'users'}/${user?.username}`}
+              style={{ color: 'rgba(255,255,255,0.85)', fontWeight: 500, textDecoration: 'none' }}
+            >{user?.username}</Link>
           </span>
           <button
             onClick={logout}

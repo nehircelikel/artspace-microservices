@@ -1,0 +1,135 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "AuthService",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-auth",
+      "program": "${workspaceFolder}/AuthService/artspace.API/bin/Debug/net8.0/artspace.API.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/AuthService/artspace.API",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://localhost:5144"
+      },
+      "sourceFileMap": {
+        "/Views": "${workspaceFolder}/Views"
+      }
+    },
+    {
+      "name": "ArtService",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-art",
+      "program": "${workspaceFolder}/ArtService/ArtService.API/bin/Debug/net8.0/ArtService.API.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/ArtService/ArtService.API",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://localhost:5280"
+      }
+    },
+    {
+      "name": "CommentService",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-comment",
+      "program": "${workspaceFolder}/CommentService/CommentService.API/bin/Debug/net8.0/CommentService.API.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/CommentService/CommentService.API",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://localhost:5285",
+        "RABBITMQ_HOST": "localhost"
+      }
+    },
+    {
+      "name": "NotificationService",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-notification",
+      "program": "${workspaceFolder}/NotificationService/NotificationService.API/bin/Debug/net8.0/NotificationService.API.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/NotificationService/NotificationService.API",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://localhost:5012",
+        "RABBITMQ_HOST": "localhost"
+      }
+    },
+    {
+      "name": "ApiGateway",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-gateway",
+      "program": "${workspaceFolder}/ApiGateway/ApiGateway/bin/Debug/net8.0/ApiGateway.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/ApiGateway/ApiGateway",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://localhost:5092"
+      }
+    },
+    {
+      "name": "Frontend (Vite)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm run dev",
+      "cwd": "${workspaceFolder}/frontend",
+      "env": {
+        "VITE_API_URL": "http://localhost:5092"
+      }
+    }
+  ],
+  "compounds": [
+    {
+      "name": "All Backend Services",
+      "configurations": [
+        "AuthService",
+        "ArtService",
+        "CommentService",
+        "NotificationService",
+        "ApiGateway"
+      ],
+      "stopAll": true
+    },
+    {
+      "name": "Full Stack (backend + frontend)",
+      "configurations": [
+        "AuthService",
+        "ArtService",
+        "CommentService",
+        "NotificationService",
+        "ApiGateway",
+        "Frontend (Vite)"
+      ],
+      "stopAll": true
+    }
+  ]
+}

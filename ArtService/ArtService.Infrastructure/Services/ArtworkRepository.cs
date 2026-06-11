@@ -29,6 +29,21 @@ public class ArtworkRepository : IArtworkRepository
         return await _context.Artworks.Where(a => a.ArtistId == artistId).ToListAsync();
     }
 
+    public async Task<(IEnumerable<Artwork> Items, int Total)> GetByArtistIdPagedAsync(Guid artistId, int page, int pageSize)
+    {
+        var query = _context.Artworks
+            .Where(a => a.ArtistId == artistId)
+            .OrderByDescending(a => a.CreatedAt);
+
+        var total = await query.CountAsync();
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (items, total);
+    }
+
     public async Task<IEnumerable<Artwork>> SearchAsync(string? category, string? keyword)
     {
         var query = _context.Artworks.AsQueryable();

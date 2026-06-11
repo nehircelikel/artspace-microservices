@@ -20,7 +20,7 @@ public class AuthService
         _configuration = configuration;
     }
 
-    public async Task<User> RegisterAsync(string email, string password, string username, string role, string? bio, string? contactEmail)
+    public async Task<User> RegisterAsync(string email, string password, string username, string role, string? bio, string? contactEmail, string? profilePictureUrl = null)
     {
         var existingUser = await _userRepository.GetByEmailAsync(email);
         if (existingUser != null)
@@ -35,6 +35,7 @@ public class AuthService
             Role = role,
             Bio = bio,
             ContactEmail = contactEmail,
+            ProfilePictureUrl = profilePictureUrl,
             CreatedAt = DateTime.UtcNow
         };
 

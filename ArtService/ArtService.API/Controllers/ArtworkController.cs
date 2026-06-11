@@ -41,6 +41,25 @@ public class ArtworkController : ControllerBase
         return Ok(artworks.Select(MapToDto));
     }
 
+    // Paginated gallery used by the artist profile page.
+    [HttpGet("artist/{artistId}/paged")]
+    public async Task<ActionResult<PagedResult<ArtworkResponseDto>>> GetByArtistPaged(
+        Guid artistId, [FromQuery] int page = 1, [FromQuery] int pageSize = 12)
+    {
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 12;
+        if (pageSize > 50) pageSize = 50;
+
+        var (items, total) = await _artworkRepository.GetByArtistIdPagedAsync(artistId, page, pageSize);
+        return Ok(new PagedResult<ArtworkResponseDto>
+        {
+            Items = items.Select(MapToDto),
+            Total = total,
+            Page = page,
+            PageSize = pageSize
+        });
+    }
+
     [HttpPost]
     [Authorize]
     public async Task<ActionResult<ArtworkResponseDto>> Create(CreateArtworkDto dto)

@@ -6,6 +6,9 @@ import RegisterPage from './pages/RegisterPage'
 import ArtworksPage from './pages/ArtworksPage'
 import ArtworkDetailPage from './pages/ArtworkDetailPage'
 import NotificationsPage from './pages/NotificationsPage'
+import RequestsPage from './pages/RequestsPage'
+import RequestDetailPage from './pages/RequestDetailPage'
+import ProfilePage from './pages/ProfilePage'
 
 export default function App() {
   return (
@@ -19,6 +22,10 @@ export default function App() {
           <Route path="/artworks" element={<ArtworksPage />} />
           <Route path="/artworks/:id" element={<ArtworkDetailPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/requests" element={<RequestsPage />} />
+          <Route path="/requests/:id" element={<RequestDetailPage />} />
+          <Route path="/users/:username" element={<ProfilePage />} />
+          <Route path="/artists/:username" element={<ProfilePage />} />
         </Routes>
       </main>
     </BrowserRouter>

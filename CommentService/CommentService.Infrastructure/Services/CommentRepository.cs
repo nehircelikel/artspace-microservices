@@ -21,8 +21,10 @@ public class CommentRepository : ICommentRepository
 
     public async Task<IEnumerable<Comment>> GetByArtworkIdAsync(Guid artworkId)
     {
+        // Top-level reviews newest-first, each with its replies oldest-first.
         return await _context.Comments
-            .Where(c => c.ArtworkId == artworkId)
+            .Where(c => c.ArtworkId == artworkId && c.ParentId == null)
+            .Include(c => c.Replies.OrderBy(r => r.CreatedAt))
             .OrderByDescending(c => c.CreatedAt)
             .ToListAsync();
     }
@@ -42,6 +44,13 @@ public class CommentRepository : ICommentRepository
         return comment;
     }
 
+    public async Task<Comment> UpdateAsync(Comment comment)
+    {
+        _context.Comments.Update(comment);
+        await _context.SaveChangesAsync();
+        return comment;
+    }
+
     public async Task DeleteAsync(Guid id)
     {
         var comment = await _context.Comments.FindAsync(id);
@@ -54,11 +63,46 @@ public class CommentRepository : ICommentRepository
 
     public async Task<double> GetAverageRatingAsync(Guid artworkId)
     {
-        var comments = await _context.Comments
-            .Where(c => c.ArtworkId == artworkId)
+        // Only reviews (parents with a rating) count toward the overall rating.
+        var ratings = await _context.Comments
+            .Where(c => c.ArtworkId == artworkId && c.ParentId == null && c.Rating != null)
+            .Select(c => c.Rating!.Value)
             .ToListAsync();
 
-        if (!comments.Any()) return 0;
-        return comments.Average(c => c.Rating);
+        if (ratings.Count == 0) return 0;
+        return ratings.Average();
+    }
+
+    public async Task<int> GetRatingCountAsync(Guid artworkId)
+    {
+        return await _context.Comments
+            .CountAsync(c => c.ArtworkId == artworkId && c.ParentId == null && c.Rating != null);
+    }
+
+    public async Task<bool> HasUserReviewedAsync(Guid artworkId, Guid userId)
+    {
+        // A review is a top-level comment (ParentId == null); replies don't count.
+        return await _context.Comments
+            .AnyAsync(c => c.ArtworkId == artworkId && c.UserId == userId && c.ParentId == null);
+    }
+
+    public async Task<IEnumerable<(Guid ArtworkId, double AverageRating, int RatingCount)>> GetRatingsForArtworksAsync(IEnumerable<Guid> artworkIds)
+    {
+        var ids = artworkIds.Distinct().ToList();
+        if (ids.Count == 0)
+            return Enumerable.Empty<(Guid, double, int)>();
+
+        var grouped = await _context.Comments
+            .Where(c => ids.Contains(c.ArtworkId) && c.ParentId == null && c.Rating != null)
+            .GroupBy(c => c.ArtworkId)
+            .Select(g => new
+            {
+                ArtworkId = g.Key,
+                AverageRating = g.Average(c => (double)c.Rating!.Value),
+                RatingCount = g.Count()
+            })
+            .ToListAsync();
+
+        return grouped.Select(g => (g.ArtworkId, g.AverageRating, g.RatingCount));
     }
 }

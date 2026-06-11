@@ -123,18 +123,41 @@ input::placeholder, textarea::placeholder {
   text-decoration: none;
 }
 
+/* Inline text-style action button (Edit / Delete / Reply) */
+.link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #5B3FD6;
+  cursor: pointer;
+}
+.link-button:hover {
+  text-decoration: underline;
+}
+
 /* ---- Cards ---- */
 .card {
-  background: #fff;
-  border: 1px solid #DDD6F7;
-  border-radius: 12px;
+  /* background: #fff; */
+  /* border: 1px solid #DDD6F7; */
   overflow: hidden;
   transition: box-shadow 0.2s, transform 0.18s;
-  box-shadow: 0 1px 4px rgba(91, 63, 214, 0.06);
+  /* box-shadow: 0 1px 4px rgba(91, 63, 214, 0.06); */
+}
+.card .top{
+  border-radius: 12px;
+  overflow: hidden;
+}
+.card .detail-line{
+  display: flex;
+  justify-content: space-between;
 }
 .card:hover {
-  box-shadow: 0 6px 22px rgba(91, 63, 214, 0.13);
-  transform: translateY(-2px);
+  /* box-shadow: 0 6px 22px rgba(91, 63, 214, 0.13); */
+  /* transform: translateY(-2px); */
 }
 
 /* ---- Form card (centered premium card for auth / create forms) ---- */
@@ -176,7 +199,50 @@ input::placeholder, textarea::placeholder {
   padding: 3rem 0;
   text-align: center;
 }
+.card .top{
+  display: flex;
+  flex-direction: column;
+  background: #fafafa center/cover;
+  height: 200px;
+}
+.card .top *{
+  transition: .3s;
+  opacity: 0;
+}
+.card .top:hover *{
+  opacity: 1;
+}
+.card .header{
+  height: 40px;
+  padding: 10px;
+  
+}
+.card .header > *,.card .header *:visited {
 
+  color: #000;
+}
+.card .center{
+  height: calc(100% - 72px);
+}
+.card .footer{
+  background: linear-gradient(transparent, #000);
+  height: 50px
+}
+.card .footer h3{
+  padding: 10px 17px;
+  width: 282px;
+  height: 30px;
+  color: #FFF;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.card .top img{
+  grid-area: 1/1
+}
+.card .top > * {
+  grid-area: 1 / 1 / 2 / 2;
+}
 /* ---- Empty state ---- */
 .empty-state {
   background: #F3EEFF;

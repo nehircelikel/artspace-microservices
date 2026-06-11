@@ -1,0 +1,6 @@
+.card{
+  display: grid;
+}
+.card .top > * {
+  grid-area: 1 / 1 / 2 / 2;
+}

@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArtService.Core", "ArtServi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArtService.Infrastructure", "ArtService.Infrastructure\ArtService.Infrastructure.csproj", "{18B3A04C-2C90-49D1-B7B4-3DC3A505370B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArtService.Tests", "ArtService.Tests\ArtService.Tests.csproj", "{052BC44D-95E4-420E-98FC-D9878F63B191}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{18B3A04C-2C90-49D1-B7B4-3DC3A505370B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{18B3A04C-2C90-49D1-B7B4-3DC3A505370B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{18B3A04C-2C90-49D1-B7B4-3DC3A505370B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{052BC44D-95E4-420E-98FC-D9878F63B191}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{052BC44D-95E4-420E-98FC-D9878F63B191}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{052BC44D-95E4-420E-98FC-D9878F63B191}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{052BC44D-95E4-420E-98FC-D9878F63B191}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

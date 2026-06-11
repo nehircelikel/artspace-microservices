@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import api from '../api/client'
+import ArtworkItem from './ArtworkItem'
 
 const CATEGORIES = [
   'Painting', 'Drawing', 'Digital Art', 'Photography',
@@ -10,7 +11,9 @@ const CATEGORIES = [
 const emptyForm = { title: '', description: '', imageUrl: '', category: '' }
 
 export default function ArtworksPage() {
+  const navigate = useNavigate()
   const [artworks, setArtworks] = useState([])
+  const [ratings, setRatings] = useState({})
   const [loading, setLoading] = useState(true)
   const [fetchError, setFetchError] = useState('')
 
@@ -35,9 +38,27 @@ export default function ArtworksPage() {
     return `/api/Artwork${qs ? '?' + qs : ''}`
   }
 
+  function loadRatings(items) {
+    const ids = items.map(a => a.id)
+    if (ids.length === 0) {
+      setRatings({})
+      return Promise.resolve()
+    }
+    return api.get(`/api/Comment/ratings?artworkIds=${ids.join(',')}`)
+      .then(({ data }) => {
+        const map = {}
+        for (const r of data) map[r.artworkId] = r
+        setRatings(map)
+      })
+      .catch(() => { /* ratings are non-critical; ignore failures */ })
+  }
+
   function loadArtworks(kw = '', cat = '') {
     return api.get(buildUrl(kw, cat))
-      .then(({ data }) => setArtworks(data))
+      .then(({ data }) => {
+        setArtworks(data)
+        return loadRatings(data)
+      })
       .catch(() => setFetchError('Could not load artworks. Make sure the backend is running.'))
   }
 
@@ -299,61 +320,7 @@ export default function ArtworksPage() {
           gap: '1.25rem',
         }}>
           {artworks.map(art => (
-            <Link
-              to={`/artworks/${art.id}`}
-              key={art.id}
-              style={{ textDecoration: 'none', color: 'inherit' }}
-            >
-              <div className="card">
-                {art.imageUrl ? (
-                  <img
-                    src={art.imageUrl}
-                    alt={art.title}
-                    style={{ width: '100%', height: 180, objectFit: 'cover', display: 'block' }}
-                    onError={e => { e.target.style.display = 'none' }}
-                  />
-                ) : (
-                  <div style={{
-                    width: '100%', height: 180, background: '#F3EEFF',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#8B6CFF', fontSize: '0.85rem', fontWeight: 500,
-                  }}>
-                    No image
-                  </div>
-                )}
-                <div style={{ padding: '1rem 1.1rem 1.1rem' }}>
-                  {art.category && (
-                    <span style={{
-                      display: 'inline-block',
-                      background: '#F3EEFF',
-                      color: '#5B3FD6',
-                      border: '1px solid #DDD6F7',
-                      borderRadius: 99,
-                      fontSize: '0.72rem',
-                      fontWeight: 600,
-                      padding: '0.15rem 0.6rem',
-                      marginBottom: '0.5rem',
-                      letterSpacing: '0.01em',
-                    }}>
-                      {art.category}
-                    </span>
-                  )}
-                  <h3 style={{ fontSize: '0.975rem', marginBottom: '0.2rem', color: '#1F1B2D' }}>
-                    {art.title}
-                  </h3>
-                  <p style={{ fontSize: '0.8rem', color: '#6E6785', marginBottom: '0.4rem' }}>
-                    {art.artistUsername}
-                  </p>
-                  {art.description && (
-                    <p style={{ fontSize: '0.85rem', color: '#4B4669', lineHeight: 1.45 }}>
-                      {art.description.length > 90
-                        ? art.description.slice(0, 90) + '…'
-                        : art.description}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </Link>
+            <ArtworkItem showRating key={art.id} art={art} navigate={navigate} rating={ratings[art.id]} />
           ))}
         </div>
       )}

@@ -1,7 +1,10 @@
 using artspace.API.DTOs;
+using artspace.Core.Entities;
 using artspace.Core.Interfaces;
 using artspace.Infrastructure.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace artspace.API.Controllers;
 
@@ -25,25 +28,12 @@ public class AuthController : ControllerBase
         {
             var user = await _authService.RegisterAsync(
                 dto.Email, dto.Password, dto.Username,
-                dto.Role, dto.Bio, dto.ContactEmail
+                dto.Role, dto.Bio, dto.ContactEmail, dto.ProfilePictureUrl
             );
 
             var token = await _authService.LoginAsync(dto.Email, dto.Password);
 
-            return Ok(new AuthResponseDto
-            {
-                Token = token,
-                User = new UserResponseDto
-                {
-                    Id = user.Id,
-                    Email = user.Email,
-                    Username = user.Username,
-                    Role = user.Role,
-                    Bio = user.Bio,
-                    ContactEmail = user.ContactEmail,
-                    CreatedAt = user.CreatedAt
-                }
-            });
+            return Ok(new AuthResponseDto { Token = token, User = MapToDto(user) });
         }
         catch (Exception ex)
         {
@@ -59,20 +49,7 @@ public class AuthController : ControllerBase
             var token = await _authService.LoginAsync(dto.Email, dto.Password);
             var user = await _userRepository.GetByEmailAsync(dto.Email);
 
-            return Ok(new AuthResponseDto
-            {
-                Token = token,
-                User = new UserResponseDto
-                {
-                    Id = user!.Id,
-                    Email = user.Email,
-                    Username = user.Username,
-                    Role = user.Role,
-                    Bio = user.Bio,
-                    ContactEmail = user.ContactEmail,
-                    CreatedAt = user.CreatedAt
-                }
-            });
+            return Ok(new AuthResponseDto { Token = token, User = MapToDto(user!) });
         }
         catch (Exception ex)
         {
@@ -86,15 +63,55 @@ public class AuthController : ControllerBase
         var user = await _userRepository.GetByIdAsync(id);
         if (user == null) return NotFound();
 
-        return Ok(new UserResponseDto
+        return Ok(MapToDto(user));
+    }
+
+    // Public profile lookup used by the /users/{username} and /artists/{username}
+    // pages. Returns a public-safe projection (no login email).
+    [HttpGet("profile/by-username/{username}")]
+    public async Task<ActionResult<PublicProfileDto>> GetProfileByUsername(string username)
+    {
+        var user = await _userRepository.GetByUsernameAsync(username);
+        if (user == null) return NotFound();
+
+        return Ok(new PublicProfileDto
         {
             Id = user.Id,
-            Email = user.Email,
             Username = user.Username,
             Role = user.Role,
             Bio = user.Bio,
             ContactEmail = user.ContactEmail,
+            ProfilePictureUrl = user.ProfilePictureUrl,
             CreatedAt = user.CreatedAt
         });
     }
+
+    // Self-service edit of the logged-in user's own profile.
+    [HttpPut("profile")]
+    [Authorize]
+    public async Task<ActionResult<UserResponseDto>> UpdateProfile(UpdateProfileDto dto)
+    {
+        var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user == null) return NotFound();
+
+        if (dto.Bio != null) user.Bio = dto.Bio;
+        if (dto.ContactEmail != null) user.ContactEmail = dto.ContactEmail;
+        if (dto.ProfilePictureUrl != null) user.ProfilePictureUrl = dto.ProfilePictureUrl;
+
+        var updated = await _userRepository.UpdateAsync(user);
+        return Ok(MapToDto(updated));
+    }
+
+    private static UserResponseDto MapToDto(User user) => new()
+    {
+        Id = user.Id,
+        Email = user.Email,
+        Username = user.Username,
+        Role = user.Role,
+        Bio = user.Bio,
+        ContactEmail = user.ContactEmail,
+        ProfilePictureUrl = user.ProfilePictureUrl,
+        CreatedAt = user.CreatedAt
+    };
 }

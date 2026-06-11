@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommentService.Core", "Comm
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommentService.Infrastructure", "CommentService.Infrastructure\CommentService.Infrastructure.csproj", "{09FD4E76-C733-4345-A3EE-434BCCF1773D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommentService.Tests", "CommentService.Tests\CommentService.Tests.csproj", "{70803898-EBBA-45B3-B00C-3084DEBB1CAD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{09FD4E76-C733-4345-A3EE-434BCCF1773D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{09FD4E76-C733-4345-A3EE-434BCCF1773D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{09FD4E76-C733-4345-A3EE-434BCCF1773D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{70803898-EBBA-45B3-B00C-3084DEBB1CAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70803898-EBBA-45B3-B00C-3084DEBB1CAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70803898-EBBA-45B3-B00C-3084DEBB1CAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70803898-EBBA-45B3-B00C-3084DEBB1CAD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -4,14 +4,15 @@ using RabbitMQ.Client;
 
 namespace CommentService.Infrastructure.Services;
 
-public class RabbitMQPublisher
+public class RabbitMQPublisher : IRabbitMQPublisher
 {
     private readonly IConnection _connection;
     private readonly IModel _channel;
 
     public RabbitMQPublisher()
     {
-        var factory = new ConnectionFactory { HostName = "rabbitmq" };
+        var hostName = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? "rabbitmq";
+        var factory = new ConnectionFactory { HostName = hostName };
         _connection = factory.CreateConnection();
         _channel = _connection.CreateModel();
         _channel.QueueDeclare(

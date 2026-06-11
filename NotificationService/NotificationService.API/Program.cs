@@ -19,6 +19,7 @@ builder.Services.AddDbContext<NotificationContext>(options =>
 
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddHostedService<RabbitMQConsumer>();
+builder.Services.AddHostedService<RequestNotificationConsumer>();
 
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -52,10 +53,14 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-using (var scope = app.Services.CreateScope())
+if (!app.Environment.IsEnvironment("Testing"))
 {
+    using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<NotificationContext>();
     db.Database.Migrate();
 }
 
 app.Run();
+
+// Exposed so WebApplicationFactory<Program> can host the app in integration tests.
+public partial class Program;

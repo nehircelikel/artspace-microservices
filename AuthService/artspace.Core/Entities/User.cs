@@ -9,5 +9,6 @@ public class User
     public string Role { get; set; } = string.Empty; 
     public string? Bio { get; set; }
     public string? ContactEmail { get; set; }
+    public string? ProfilePictureUrl { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

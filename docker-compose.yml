@@ -4,7 +4,7 @@ services:
     container_name: artspace-postgres
     environment:
       POSTGRES_PASSWORD: artspace123
-      POSTGRES_MULTIPLE_DATABASES: authdb,artdb,commentdb,notificationdb
+      POSTGRES_MULTIPLE_DATABASES: authdb,artdb,commentdb,notificationdb,requestdb
     ports:
       - "5432:5432"
     volumes:
@@ -71,6 +71,20 @@ services:
       - Jwt__Issuer=artspace
       - Jwt__Audience=artspace
 
+  request-service:
+    build: ./RequestService
+    restart: on-failure
+    ports:
+      - "5015:8080"
+    depends_on:
+      - postgres
+      - rabbitmq
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=requestdb;Username=postgres;Password=artspace123
+      - Jwt__Secret=artspace_super_secret_key_123456789_must_be_long
+      - Jwt__Issuer=artspace
+      - Jwt__Audience=artspace
+
   api-gateway:
     build: ./ApiGateway/ApiGateway
     restart: on-failure
@@ -81,6 +95,7 @@ services:
       - art-service
       - comment-service
       - notification-service
+      - request-service
 
   frontend:
     build: ./frontend
