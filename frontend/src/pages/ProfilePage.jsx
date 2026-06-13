@@ -3,8 +3,8 @@ import { useParams, Link, useSearchParams } from 'react-router-dom'
 import api from '../api/client'
 import Avatar from '../components/Avatar'
 import CommissionRequest from '../components/CommissionRequest'
-import ReferenceItem from '../components/ReferenceItem'
-import ArtworkItem from './ArtworkItem'
+import ArtworksTab from '../components/ArtworksTab'
+import ReferencesTab from '../components/ReferencesTab'
 
 const PAGE_SIZE = 12
 
@@ -289,85 +289,6 @@ export default function ProfilePage() {
           )}
         </div>
       )}
-    </div>
-  )
-}
-
-function ArtworksTab({ gallery, loading, page, setPage, username }) {
-  if (loading) return <p className="loading-text">Loading artworks…</p>
-
-  if (gallery.items.length === 0) {
-    return (
-      <div className="empty-state">
-        <p className="empty-title">{username} hasn't shared any artworks yet.</p>
-        <p className="empty-sub">Check back later for new works.</p>
-      </div>
-    )
-  }
-
-  return (
-    <div>
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-        gap: '1.1rem',
-      }}>
-        {gallery.items.map(art => (
-          <ArtworkItem art={art} />
-        ))}
-      </div>
-
-      {/* Pagination */}
-      {gallery.totalPages > 1 && (
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '1rem',
-          marginTop: '1.75rem',
-        }}>
-          <button
-            className="btn-secondary"
-            disabled={page <= 1}
-            onClick={() => setPage(p => Math.max(1, p - 1))}
-            style={{ opacity: page <= 1 ? 0.5 : 1 }}
-          >
-            ← Prev
-          </button>
-          <span className="muted" style={{ fontSize: '0.85rem' }}>
-            Page {page} of {gallery.totalPages}
-          </span>
-          <button
-            className="btn-secondary"
-            disabled={page >= gallery.totalPages}
-            onClick={() => setPage(p => Math.min(gallery.totalPages, p + 1))}
-            style={{ opacity: page >= gallery.totalPages ? 0.5 : 1 }}
-          >
-            Next →
-          </button>
-        </div>
-      )}
-    </div>
-  )
-}
-
-function ReferencesTab({ references, loading, username }) {
-  if (loading) return <p className="loading-text">Loading reference arts…</p>
-
-  if (references.length === 0) {
-    return (
-      <div className="empty-state">
-        <p className="empty-title">{username} has no completed commissions yet.</p>
-        <p className="empty-sub">Accepted commission deliveries appear here as reference arts.</p>
-      </div>
-    )
-  }
-
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1.1rem' }}>
-      {references.map(r => (
-        <ReferenceItem key={r.id} reference={r} showArtist={false} />
-      ))}
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import StarRating from '../components/StarRating'
+import StarRating from './StarRating'
 const ArtworkItem = ({ art, navigate, rating, showDesc, showRating }) =>
   <Link
     to={`/artworks/${art.id}`}

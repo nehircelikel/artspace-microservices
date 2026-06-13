@@ -4,6 +4,7 @@ import api from '../api/client'
 import StatusBadge from '../components/StatusBadge'
 import NegotiationActions from '../components/NegotiationActions'
 import DealTerm from '../components/DealTerm'
+import MessageContent from '../components/MessageContent'
 
 // Client-side mirror of δ — used ONLY to decide which buttons to show. The server's
 // transition function is the sole authority; the UI is a hint (spec §Page display).
@@ -40,24 +41,6 @@ const ACTION_LABEL = {
 
 const labelStyle = { fontSize: '0.72rem', color: '#6E6785', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.2rem' }
 const cardStyle = { background: '#fff', border: '1px solid #DDD6F7', borderRadius: 12, padding: '1.25rem 1.4rem', marginBottom: '1.25rem' }
-
-const IMAGE_URL_RE = /^https?:\/\/\S+$/i
-
-// A bare URL (e.g. an artist's deliverable link) renders as an inline image preview with the
-// link beneath; anything else renders as plain text.
-function MessageContent({ content }) {
-  if (IMAGE_URL_RE.test(content.trim())) {
-    return (
-      <a href={content} target="_blank" rel="noreferrer" style={{ color: 'inherit', textDecoration: 'none', display: 'block' }}>
-        <img src={content} alt="shared"
-          style={{ maxWidth: '100%', maxHeight: 240, borderRadius: 8, display: 'block', marginBottom: '0.3rem' }}
-          onError={e => { e.target.style.display = 'none' }} />
-        <span style={{ fontSize: '0.72rem', opacity: 0.85, wordBreak: 'break-all' }}>{content}</span>
-      </a>
-    )
-  }
-  return content
-}
 
 export default function RequestDetailPage() {
   const { id } = useParams()

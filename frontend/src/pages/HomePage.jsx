@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../api/client'
-import ArtworkItem from './ArtworkItem'
+import ArtworkItem from '../components/ArtworkItem'
 import ReferenceItem from '../components/ReferenceItem'
 
 const CATEGORIES = [
   'Painting', 'Drawing', 'Digital Art', 'Photography',
-  'Sculpture', 'Illustration', 'Mixed Media', 'Other',
+  'Sculpture', 'Illustration', 'Other',
 ]
 
 const emptyForm = { title: '', description: '', imageUrl: '', category: '' }
