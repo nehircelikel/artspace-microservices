@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import api from '../api/client'
 
 export default function ArtworkDetailPage() {
   const { id } = useParams()
+  const navigate = useNavigate()
   const [artwork, setArtwork] = useState(null)
   const [comments, setComments] = useState([])
   const [loading, setLoading] = useState(true)
@@ -23,6 +24,9 @@ export default function ArtworkDetailPage() {
   const [commissionBusy, setCommissionBusy] = useState(false)
   const [commissionError, setCommissionError] = useState('')
   const [commissionMsg, setCommissionMsg] = useState('')
+
+  // Delete state
+  const [deleteBusy, setDeleteBusy] = useState(false)
 
   const token = localStorage.getItem('token')
   const user = JSON.parse(localStorage.getItem('user') || 'null')
@@ -72,6 +76,18 @@ export default function ArtworkDetailPage() {
       // ignore
     } finally {
       setLikeBusy(false)
+    }
+  }
+
+  async function handleDelete() {
+    if (!window.confirm('Are you sure you want to delete this artwork? This action cannot be undone.')) return
+    setDeleteBusy(true)
+    try {
+      await api.delete(`/api/Artwork/${id}`)
+      navigate('/artworks')
+    } catch (err) {
+      alert('Failed to delete artwork.')
+      setDeleteBusy(false)
     }
   }
 
@@ -129,6 +145,9 @@ export default function ArtworkDetailPage() {
 
   // Can the logged-in user commission this artist? (not their own work)
   const canCommission = token && user && artwork?.artistId && user.id !== artwork.artistId
+
+  // Is the logged-in user the owner of this artwork? (can delete)
+  const isOwner = token && user && artwork?.artistId && user.id === artwork.artistId
 
   return (
     <div style={{ maxWidth: 740, margin: '0 auto' }}>
@@ -188,6 +207,17 @@ export default function ArtworkDetailPage() {
             onClick={() => { setShowCommission(s => !s); setCommissionMsg('') }}
           >
             {showCommission ? 'Cancel' : 'Request Commission'}
+          </button>
+        )}
+
+        {isOwner && (
+          <button
+            onClick={handleDelete}
+            disabled={deleteBusy}
+            className="btn-secondary"
+            style={{ color: '#E0245E', borderColor: '#E0245E', marginLeft: 'auto' }}
+          >
+            {deleteBusy ? 'Deleting…' : 'Delete Artwork'}
           </button>
         )}
       </div>
