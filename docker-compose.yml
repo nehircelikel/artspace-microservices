@@ -1,14 +1,14 @@
 services:
   postgres:
-    image: postgres
+    image: postgres:17
     container_name: artspace-postgres
     environment:
       POSTGRES_PASSWORD: artspace123
-      POSTGRES_MULTIPLE_DATABASES: authdb,artdb,commentdb,notificationdb
+      POSTGRES_MULTIPLE_DATABASES: authdb,artdb,commentdb,notificationdb,commissiondb
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/17
+      - postgres_data:/var/lib/postgresql/data
 
   rabbitmq:
     image: rabbitmq:management
@@ -53,6 +53,7 @@ services:
       - rabbitmq
     environment:
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=commentdb;Username=postgres;Password=artspace123
+      - RabbitMQ__HostName=rabbitmq
       - Jwt__Secret=artspace_super_secret_key_123456789_must_be_long
       - Jwt__Issuer=artspace
       - Jwt__Audience=artspace
@@ -67,6 +68,22 @@ services:
       - rabbitmq
     environment:
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=notificationdb;Username=postgres;Password=artspace123
+      - RabbitMQ__HostName=rabbitmq
+      - Jwt__Secret=artspace_super_secret_key_123456789_must_be_long
+      - Jwt__Issuer=artspace
+      - Jwt__Audience=artspace
+
+  commission-service:
+    build: ./CommissionService
+    restart: on-failure
+    ports:
+      - "5013:8080"
+    depends_on:
+      - postgres
+      - rabbitmq
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=commissiondb;Username=postgres;Password=artspace123
+      - RabbitMQ__HostName=rabbitmq
       - Jwt__Secret=artspace_super_secret_key_123456789_must_be_long
       - Jwt__Issuer=artspace
       - Jwt__Audience=artspace
@@ -81,6 +98,7 @@ services:
       - art-service
       - comment-service
       - notification-service
+      - commission-service
 
   frontend:
     build: ./frontend

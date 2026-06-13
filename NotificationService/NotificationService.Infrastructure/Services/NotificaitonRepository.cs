@@ -22,6 +22,11 @@ public class NotificationRepository : INotificationRepository
             .ToListAsync();
     }
 
+    public async Task<Notification?> GetByIdAsync(Guid id)
+    {
+        return await _context.Notifications.FindAsync(id);
+    }
+
     public async Task<Notification> CreateAsync(Notification notification)
     {
         _context.Notifications.Add(notification);

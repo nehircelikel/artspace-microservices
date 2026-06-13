@@ -10,6 +10,7 @@ public class CommentServiceContext : DbContext
     }
 
     public DbSet<Comment> Comments { get; set; }
+    public DbSet<Like> Likes { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -19,6 +20,14 @@ public class CommentServiceContext : DbContext
             entity.Property(c => c.Content).IsRequired();
             entity.Property(c => c.ArtworkId).IsRequired();
             entity.Property(c => c.UserId).IsRequired();
+        });
+
+        modelBuilder.Entity<Like>(entity =>
+        {
+            entity.HasKey(l => l.Id);
+            entity.Property(l => l.ArtworkId).IsRequired();
+            entity.Property(l => l.UserId).IsRequired();
+            entity.HasIndex(l => new { l.ArtworkId, l.UserId }).IsUnique();
         });
     }
 }

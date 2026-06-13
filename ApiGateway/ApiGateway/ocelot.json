@@ -35,6 +35,33 @@
       ],
       "UpstreamPathTemplate": "/api/Notification/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Like/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        { "Host": "comment-service", "Port": 8080 }
+      ],
+      "UpstreamPathTemplate": "/api/Like/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Commission/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        { "Host": "commission-service", "Port": 8080 }
+      ],
+      "UpstreamPathTemplate": "/api/Commission/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Commission",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        { "Host": "commission-service", "Port": 8080 }
+      ],
+      "UpstreamPathTemplate": "/api/Commission",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     }
   ],
   "GlobalConfiguration": {

@@ -26,3 +26,19 @@ public class ArtworkRatingDto
     public double AverageRating { get; set; }
     public int TotalComments { get; set; }
 }
+
+public class LikeStatusDto
+{
+    public Guid ArtworkId { get; set; }
+    public bool IsLiked { get; set; }
+    public int TotalLikes { get; set; }
+}
+
+public class LikedArtworkDto
+{
+    public Guid Id { get; set; }
+    public Guid ArtworkId { get; set; }
+    public Guid UserId { get; set; }
+    public string Username { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; }
+}

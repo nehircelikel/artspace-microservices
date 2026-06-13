@@ -31,6 +31,12 @@ public class RabbitMQConsumer : BackgroundService
             exclusive: false,
             autoDelete: false,
             arguments: null);
+        _channel.QueueDeclare(
+            queue: "commission_created",
+            durable: true,
+            exclusive: false,
+            autoDelete: false,
+            arguments: null);
         return base.StartAsync(cancellationToken);
     }
 
@@ -59,7 +65,31 @@ public class RabbitMQConsumer : BackgroundService
             }
         };
 
+        var commissionConsumer = new EventingBasicConsumer(_channel);
+        commissionConsumer.Received += async (model, ea) =>
+        {
+            var body = ea.Body.ToArray();
+            var message = Encoding.UTF8.GetString(body);
+            var commissionEvent = JsonSerializer.Deserialize<CommentCreatedEvent>(message);
+
+            if (commissionEvent != null)
+            {
+                using var scope = _scopeFactory.CreateScope();
+                var repo = scope.ServiceProvider.GetRequiredService<INotificationRepository>();
+
+                await repo.CreateAsync(new Notification
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = commissionEvent.ArtistId,
+                    Message = $"{commissionEvent.Username} {commissionEvent.Content}",
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
+        };
+
         _channel.BasicConsume(queue: "comment_created", autoAck: true, consumer: consumer);
+        _channel.BasicConsume(queue: "commission_created", autoAck: true, consumer: commissionConsumer);
         return;
     }
 

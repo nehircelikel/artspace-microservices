@@ -1,12 +1,10 @@
-using CommentService.Core.Interfaces;
-using CommentService.Infrastructure.Data;
-using CommentService.Infrastructure.Services;
+using CommissionService.Core.Interfaces;
+using CommissionService.Infrastructure.Data;
+using CommissionService.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using CommentService.Core.Interfaces;
-using CommentService.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,14 +13,13 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Database
-builder.Services.AddDbContext<CommentServiceContext>(options =>
+builder.Services.AddDbContext<CommissionServiceContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Services
-
-builder.Services.AddScoped<ICommentRepository, CommentRepository>();
-builder.Services.AddScoped<ILikeRepository, LikeRepository>();
+builder.Services.AddScoped<ICommissionRepository, CommissionRepository>();
 builder.Services.AddSingleton<RabbitMQPublisher>();
+
 // JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -57,7 +54,7 @@ app.MapControllers();
 
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<CommentServiceContext>();
+    var db = scope.ServiceProvider.GetRequiredService<CommissionServiceContext>();
     db.Database.Migrate();
 }
 

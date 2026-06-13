@@ -30,6 +30,11 @@ public class NotificationController : ControllerBase
     [HttpPut("{id}/read")]
     public async Task<IActionResult> MarkAsRead(Guid id)
     {
+        var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var notification = await _notificationRepository.GetByIdAsync(id);
+        if (notification == null) return NotFound();
+        if (notification.UserId != userId) return Forbid();
+
         await _notificationRepository.MarkAsReadAsync(id);
         return NoContent();
     }
