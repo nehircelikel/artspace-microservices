@@ -12,10 +12,36 @@ export default function ArtworkDetailPage() {
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
 
+  // Like state
+  const [likeCount, setLikeCount] = useState(0)
+  const [isLiked, setIsLiked] = useState(false)
+  const [likeBusy, setLikeBusy] = useState(false)
+
+  // Commission state
+  const [showCommission, setShowCommission] = useState(false)
+  const [commission, setCommission] = useState({ title: '', description: '', budget: '' })
+  const [commissionBusy, setCommissionBusy] = useState(false)
+  const [commissionError, setCommissionError] = useState('')
+  const [commissionMsg, setCommissionMsg] = useState('')
+
   const token = localStorage.getItem('token')
+  const user = JSON.parse(localStorage.getItem('user') || 'null')
 
   function loadComments() {
     return api.get(`/api/Comment/artwork/${id}`).then(r => setComments(r.data))
+  }
+
+  function loadLikes() {
+    // Public count
+    api.get(`/api/Like/artwork/${id}/count`)
+      .then(r => setLikeCount(r.data.totalLikes))
+      .catch(() => {})
+    // Whether current user liked it (only if logged in)
+    if (token) {
+      api.get(`/api/Like/artwork/${id}/status`)
+        .then(r => { setIsLiked(r.data.isLiked); setLikeCount(r.data.totalLikes) })
+        .catch(() => {})
+    }
   }
 
   useEffect(() => {
@@ -31,7 +57,23 @@ export default function ArtworkDetailPage() {
         setError(err.response?.status === 404 ? 'Artwork not found.' : 'Could not load artwork.')
       })
       .finally(() => setLoading(false))
+    loadLikes()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
+
+  async function handleToggleLike() {
+    if (!token) return
+    setLikeBusy(true)
+    try {
+      const r = await api.post(`/api/Like/artwork/${id}`)
+      setIsLiked(r.data.isLiked)
+      setLikeCount(r.data.totalLikes)
+    } catch {
+      // ignore
+    } finally {
+      setLikeBusy(false)
+    }
+  }
 
   async function handleCommentSubmit(e) {
     e.preventDefault()
@@ -54,6 +96,29 @@ export default function ArtworkDetailPage() {
     }
   }
 
+  async function handleCommissionSubmit(e) {
+    e.preventDefault()
+    setCommissionError('')
+    setCommissionMsg('')
+    setCommissionBusy(true)
+    try {
+      await api.post('/api/Commission', {
+        artistId: artwork?.artistId,
+        title: commission.title,
+        description: commission.description,
+        budget: commission.budget ? Number(commission.budget) : null,
+      })
+      setCommission({ title: '', description: '', budget: '' })
+      setShowCommission(false)
+      setCommissionMsg('Your commission request has been sent to the artist.')
+    } catch (err) {
+      const msg = err.response?.data
+      setCommissionError(typeof msg === 'string' ? msg : 'Failed to send commission request.')
+    } finally {
+      setCommissionBusy(false)
+    }
+  }
+
   if (loading) return <p className="loading-text">Loading…</p>
   if (error) return (
     <div>
@@ -61,6 +126,9 @@ export default function ArtworkDetailPage() {
       <Link to="/artworks">← Back to artworks</Link>
     </div>
   )
+
+  // Can the logged-in user commission this artist? (not their own work)
+  const canCommission = token && user && artwork?.artistId && user.id !== artwork.artistId
 
   return (
     <div style={{ maxWidth: 740, margin: '0 auto' }}>
@@ -92,6 +160,95 @@ export default function ArtworkDetailPage() {
           }}
           onError={e => { e.target.style.display = 'none' }}
         />
+      )}
+
+      {/* Like + Commission action bar */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+        <button
+          onClick={handleToggleLike}
+          disabled={!token || likeBusy}
+          className="btn-secondary"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.4rem',
+            cursor: token ? 'pointer' : 'not-allowed',
+            color: isLiked ? '#E0245E' : '#6E6785',
+            borderColor: isLiked ? '#E0245E' : undefined,
+          }}
+          title={token ? 'Like / save this artwork' : 'Log in to like'}
+        >
+          <span style={{ fontSize: '1.05rem' }}>{isLiked ? '♥' : '♡'}</span>
+          <span>{likeCount}</span>
+        </button>
+
+        {canCommission && (
+          <button
+            className="btn-primary"
+            onClick={() => { setShowCommission(s => !s); setCommissionMsg('') }}
+          >
+            {showCommission ? 'Cancel' : 'Request Commission'}
+          </button>
+        )}
+      </div>
+
+      {/* Commission success banner */}
+      {commissionMsg && (
+        <p className="success-text" style={{ marginBottom: '1.5rem' }}>{commissionMsg}</p>
+      )}
+
+      {/* Commission form */}
+      {canCommission && showCommission && (
+        <div style={{
+          background: '#fff',
+          border: '1px solid #DDD6F7',
+          borderRadius: 12,
+          padding: '1.5rem 1.75rem',
+          marginBottom: '2rem',
+          boxShadow: '0 2px 20px rgba(91, 63, 214, 0.09)',
+        }}>
+          <h3 style={{ fontSize: '1rem', margin: '0 0 1.1rem', color: '#1F1B2D' }}>
+            Request a commission from {artwork.artistUsername}
+          </h3>
+          <form onSubmit={handleCommissionSubmit} className="form-stack">
+            <div>
+              <label className="field-label">Title</label>
+              <input
+                type="text"
+                value={commission.title}
+                onChange={e => setCommission({ ...commission, title: e.target.value })}
+                placeholder="e.g. Portrait of my dog"
+                required
+                autoFocus
+              />
+            </div>
+            <div>
+              <label className="field-label">Description</label>
+              <textarea
+                value={commission.description}
+                onChange={e => setCommission({ ...commission, description: e.target.value })}
+                rows={3}
+                placeholder="Describe what you would like the artist to create…"
+                style={{ resize: 'vertical' }}
+              />
+            </div>
+            <div>
+              <label className="field-label">Budget <span className="muted">(optional, ₺)</span></label>
+              <input
+                type="number"
+                min="0"
+                value={commission.budget}
+                onChange={e => setCommission({ ...commission, budget: e.target.value })}
+                placeholder="e.g. 500"
+                style={{ width: 'auto' }}
+              />
+            </div>
+            {commissionError && <p className="error-text">{commissionError}</p>}
+            <button type="submit" disabled={commissionBusy} className="btn-primary">
+              {commissionBusy ? 'Sending…' : 'Send Request'}
+            </button>
+          </form>
+        </div>
       )}
 
       {artwork.description && (
