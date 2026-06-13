@@ -22,6 +22,12 @@ export default function HomePage() {
   const [keyword, setKeyword] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('')
 
+  // Filters that were actually applied to the currently-displayed `artworks`.
+  // Kept separate from the live input fields above so the results label never
+  // describes a filter the user has only selected but not yet searched for.
+  const [appliedKeyword, setAppliedKeyword] = useState('')
+  const [appliedCategory, setAppliedCategory] = useState('')
+
   const [showForm, setShowForm] = useState(false)
   const [newArt, setNewArt] = useState(emptyForm)
   const [creating, setCreating] = useState(false)
@@ -59,6 +65,10 @@ export default function HomePage() {
     return api.get(buildUrl(kw, cat))
       .then(({ data }) => {
         setArtworks(data)
+        // Record the filters this result set was actually fetched with so the
+        // results label stays in sync with the data (not the pending inputs).
+        setAppliedKeyword(kw.trim())
+        setAppliedCategory(cat)
         return loadRatings(data)
       })
       .catch(() => setFetchError('Could not load artworks. Make sure the backend is running.'))
@@ -81,7 +91,10 @@ export default function HomePage() {
     loadArtworks('', '')
   }
 
-  const isFiltered = keyword.trim() !== '' || selectedCategory !== ''
+  // Drives the Clear button — reflects what's in the input fields right now.
+  const hasFilterInput = keyword.trim() !== '' || selectedCategory !== ''
+  // Drives the results label / empty state — reflects what was actually searched.
+  const isFiltered = appliedKeyword !== '' || appliedCategory !== ''
 
   function setField(field) {
     return e => setNewArt(prev => ({ ...prev, [field]: e.target.value }))
@@ -193,7 +206,7 @@ export default function HomePage() {
               <button type="submit" className="btn-primary" style={{ flex: '0 0 auto' }}>
                 Search
               </button>
-              {isFiltered && (
+              {hasFilterInput && (
                 <button
                   type="button"
                   onClick={clearSearch}
@@ -320,8 +333,8 @@ export default function HomePage() {
           {isFiltered && artworks.length > 0 && (
             <p className="muted" style={{ marginBottom: '1rem', fontSize: '0.85rem' }}>
               {artworks.length} result{artworks.length !== 1 ? 's' : ''}
-              {keyword.trim() && <> for <strong>"{keyword.trim()}"</strong></>}
-              {selectedCategory && <> in <strong>{selectedCategory}</strong></>}
+              {appliedKeyword && <> for <strong>"{appliedKeyword}"</strong></>}
+              {appliedCategory && <> in <strong>{appliedCategory}</strong></>}
             </p>
           )}
 
